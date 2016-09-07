@@ -1,0 +1,20 @@
+#cloud-config
+ssh_authorized_keys:
+  - ${ssh_public_key}
+coreos:
+  update:
+    reboot-strategy: "off"
+  units:
+    - name: sshd.socket
+      command: restart
+      runtime: true
+      content: |
+        [Unit]
+        Description=OpenSSH ServerSocket
+        Conflicts=sshd.service
+        [Socket]
+        ExecStartPre=/usr/bin/sleep 10
+        ListenStream=${ssh_port}
+        ReusePort=yes
+        FreeBind=true
+        Accept=yes

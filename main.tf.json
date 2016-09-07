@@ -1,0 +1,55 @@
+{
+    "variable": {
+        "SSH_PORT": {
+            "default": 22022
+        },
+        "SSH_USER": {
+            "default": "core"
+        },
+        "SSH_PUBLIC_KEY": {
+            "default": "${file(~/.ssh/id_rsa.pub)}"
+        },
+        "SSH_NAME": {
+            "default": "default"
+        },
+        "DOMAIN_NAME": {
+            "default": "example.com"
+        }
+    },
+    "data": {
+        "template_file": {
+            "cloud-config-initial": {
+                "template": "${file(\"templates/cloud-config-initial.yml\")}",
+                "vars": {
+                    "ssh_port": "${var.SSH_PORT}",
+                    "ssh_public_key": "${var.SSH_PUBLIC_KEY}"
+                }
+            }
+        }
+    },
+    "resource": {
+        "digitalocean_tag": {
+            "cluster": {
+                "name": "Cluster"
+            },
+            "coreos": {
+                "name": "CoreOS"
+            },
+            "persistent": {
+                "name": "Persistent"
+            }
+        },
+        "digitalocean_domain": {
+            "default": {
+                "ip_address": "127.0.0.1",
+                "name": "${var.DOMAIN_NAME}"
+            }
+        },
+        "digitalocean_ssh_key": {
+            "default": {
+                "public_key": "${var.SSH_PUBLIC_KEY}",
+                "name": "${var.SSH_NAME}"
+            }
+        }
+    }
+}

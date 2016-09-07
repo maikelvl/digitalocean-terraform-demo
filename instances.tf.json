@@ -1,0 +1,52 @@
+{
+    "variable": {
+        "coreos-instances": {
+            "default": 3
+        }
+    },
+    "output": {
+        "coreos-instances": {
+            "value": "${var.coreos-instances}"
+        }
+    },
+    "resource": {
+        "digitalocean_droplet": {
+            "coreos": {
+                "count": "${var.coreos-instances}",
+                "ssh_keys": [
+                    "${digitalocean_ssh_key.default.id}"
+                ],
+                "image": "coreos-beta",
+                "user_data": "${data.template_file.cloud-config-initial.rendered}",
+                "ipv6": true,
+                "private_networking": true,
+                "size": "512mb",
+                "region": "ams2",
+                "name": "coreos-${count.index + 1}"
+            }
+        },
+        "digitalocean_record": {
+            "coreos-A": {
+                "count": "${var.coreos-instances}",
+                "domain": "${digitalocean_domain.default.name}",
+                "type": "A",
+                "name": "coreos-${count.index + 1}",
+                "value": "${element(digitalocean_droplet.coreos.*.ipv4_address, count.index)}"
+            },
+            "coreos-AAAA": {
+                "count": "${var.coreos-instances}",
+                "domain": "${digitalocean_domain.default.name}",
+                "type": "AAAA",
+                "name": "coreos-${count.index + 1}",
+                "value": "${element(digitalocean_droplet.coreos.*.ipv6_address, count.index)}"
+            },
+            "coreos-A-private": {
+                "count": "${var.coreos-instances}",
+                "domain": "${digitalocean_domain.default.name}",
+                "type": "A",
+                "name": "in.coreos-${count.index + 1}",
+                "value": "${element(digitalocean_droplet.coreos.*.ipv4_address_private, count.index)}"
+            }
+        }
+    }
+}
